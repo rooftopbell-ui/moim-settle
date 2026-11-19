@@ -10,7 +10,7 @@
     --accent: #fee500; --accent-ink: #3a1d1d; --r1: #ff8a5b; --r2: #4fa3f7; --r3: #9b7bf2; --danger: #e5484d;
   }
   * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--ink);
+  body { margin: 0; background: var(--bg); color: var(--ink); transition: background-color .6s;
     font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif; }
   .wrap { max-width: 640px; margin: 0 auto; padding: 24px 16px 120px; }
   h1 { font-size: 24px; margin: 0 0 4px; }
@@ -54,7 +54,8 @@
     background: linear-gradient(transparent, var(--bg) 30%); }
   .copybar button { display: block; width: 100%; max-width: 608px; margin: 0 auto; background: var(--accent);
     color: var(--accent-ink); border: 0; border-radius: 14px; padding: 16px; font-size: 17px; font-weight: 800;
-    cursor: pointer; font-family: inherit; box-shadow: 0 4px 14px rgba(0,0,0,.12); }
+    cursor: pointer; font-family: inherit; box-shadow: 0 4px 14px rgba(0,0,0,.12);
+    position: relative; transition: transform .15s ease-out; }
   .toast { position: fixed; left: 50%; bottom: 92px; transform: translateX(-50%) translateY(20px); opacity: 0;
     background: rgba(31,29,26,.92); color: #fff; padding: 10px 18px; border-radius: 999px; font-size: 14px;
     transition: .25s; pointer-events: none; }
@@ -310,6 +311,34 @@ $('resetBtn').addEventListener('click', () => {
     setTimeout(() => { delete b.dataset.confirm; b.textContent = '전체 초기화'; b.style.background = ''; b.style.color = ''; }, 3000);
   }
 });
+
+/* ---------- 장난: 도망가는 버튼 ---------- */
+(() => {
+  const btn = $('copyBtn');
+  let dx = 0, dy = 0;
+  document.addEventListener('mousemove', e => {
+    const r = btn.getBoundingClientRect();
+    const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    const near = e.clientX > r.left - 60 && e.clientX < r.right + 60 &&
+                 e.clientY > r.top - 60 && e.clientY < r.bottom + 60;
+    if (!near) return;
+    // 마우스 반대 방향으로 점프
+    const ax = cx - e.clientX || 1, ay = cy - e.clientY || 1;
+    const len = Math.hypot(ax, ay);
+    dx += ax / len * 140; dy += ay / len * 100;
+    // 화면 밖으로 나가면 반대편으로 되돌리기
+    const maxX = innerWidth / 2 - r.width / 2, maxY = innerHeight - 100;
+    if (Math.abs(dx) > maxX) dx = -Math.sign(dx) * maxX * 0.5;
+    if (dy > 0) dy = -60;
+    if (dy < -maxY) dy = -maxY * 0.3;
+    btn.style.transform = `translate(${dx}px, ${dy}px)`;
+  });
+})();
+
+/* ---------- 장난: 1초마다 배경색 변경 ---------- */
+setInterval(() => {
+  document.body.style.backgroundColor = `hsl(${Math.floor(Math.random() * 360)}, 80%, 85%)`;
+}, 1000);
 
 renderAll();
 </script>
